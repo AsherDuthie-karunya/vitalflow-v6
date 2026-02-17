@@ -1,0 +1,92 @@
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Heart, Dumbbell, CalendarClock, Bot, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { path: "/", label: "Dashboard", icon: LayoutDashboard, gradient: "gradient-health" },
+  { path: "/workouts", label: "Workouts", icon: Dumbbell, gradient: "gradient-workout" },
+  { path: "/routines", label: "Routines", icon: CalendarClock, gradient: "gradient-routine" },
+  { path: "/ai-coach", label: "AI Coach", icon: Bot, gradient: "gradient-ai" },
+];
+
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const { signOut } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Top Bar */}
+      <header className="sticky top-0 z-50 glass-card rounded-none border-x-0 border-t-0 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg gradient-health">
+              <Heart className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold font-display text-gradient-hero">VitalFlow</span>
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link key={item.path} to={item.path} className="relative">
+                  <div className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </div>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className={cn("absolute inset-0 rounded-lg opacity-15", item.gradient)}
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-muted">
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-card rounded-none border-x-0 border-b-0 px-2 py-2">
+        <div className="flex justify-around">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link key={item.path} to={item.path} className="relative flex flex-col items-center gap-1 p-2">
+                <item.icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("text-[10px] font-medium", isActive ? "text-primary" : "text-muted-foreground")}>
+                  {item.label}
+                </span>
+                {isActive && (
+                  <motion.div
+                    layoutId="mobileTab"
+                    className={cn("absolute inset-0 rounded-lg opacity-15", item.gradient)}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Content */}
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 pb-24 md:pb-6">
+        {children}
+      </main>
+    </div>
+  );
+};
+
+export default AppLayout;
