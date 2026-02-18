@@ -111,7 +111,6 @@ This system unifies healthcare monitoring, fitness tracking, and productivity op
 
 ## 🛠️ Tech Stack
 
-* **Programming Language:** Python
 * **AI Integration:** AI API (API Key Based Authentication)
 * **Data Handling:** Optimized Compression & Structured Processing
 * **Architecture:** Modular, Scalable Design
