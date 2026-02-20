@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Heart, Activity, Moon, Droplets, Flame, Footprints, Brain, Plus, TrendingUp, Scale, Zap, Target, Calendar } from "lucide-react";
+import { Heart, Activity, Moon, Droplets, Flame, Footprints, Brain, Plus, TrendingUp, Scale, Zap, Target, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, subDays } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const metricCards = [
   { key: "heart_rate", label: "Heart Rate", icon: Heart, unit: "bpm", gradient: "gradient-workout", color: "hsl(340, 75%, 55%)" },
@@ -37,11 +40,11 @@ const Dashboard = () => {
   const [routineCompletion, setRoutineCompletion] = useState(0);
   const [healthScore, setHealthScore] = useState(0);
   const [logOpen, setLogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [formData, setFormData] = useState({
     weight: "", blood_pressure_sys: "", blood_pressure_dia: "", heart_rate: "",
     sleep_hours: "", water_intake: "", calories: "", steps: "", mood: "", notes: "",
   });
-
   const fetchData = async () => {
     if (!user) return;
     const today = new Date().toISOString().split("T")[0];
@@ -108,18 +111,50 @@ const Dashboard = () => {
 
   useEffect(() => { fetchData(); }, [user]);
 
+  // Load existing metrics when date or dialog changes
+  useEffect(() => {
+    const loadDateMetrics = async () => {
+      if (!user || !logOpen) return;
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+      const { data } = await supabase.from("health_metrics").select("*")
+        .eq("user_id", user.id).eq("metric_date", dateStr).maybeSingle();
+      if (data) {
+        setFormData({
+          heart_rate: data.heart_rate?.toString() || "",
+          steps: data.steps?.toString() || "",
+          calories: data.calories?.toString() || "",
+          sleep_hours: data.sleep_hours?.toString() || "",
+          water_intake: data.water_intake?.toString() || "",
+          weight: data.weight?.toString() || "",
+          blood_pressure_sys: data.blood_pressure_sys?.toString() || "",
+          blood_pressure_dia: data.blood_pressure_dia?.toString() || "",
+          mood: data.mood || "",
+          notes: data.notes || "",
+        });
+      } else {
+        setFormData({ weight: "", blood_pressure_sys: "", blood_pressure_dia: "", heart_rate: "", sleep_hours: "", water_intake: "", calories: "", steps: "", mood: "", notes: "" });
+      }
+    };
+    loadDateMetrics();
+  }, [selectedDate, logOpen, user]);
+
   const handleLogMetrics = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    const today = new Date().toISOString().split("T")[0];
-    const payload: any = { user_id: user.id, metric_date: today };
+    const dateStr = format(selectedDate, "yyyy-MM-dd");
+    const payload: any = { user_id: user.id, metric_date: dateStr };
     Object.entries(formData).forEach(([k, v]) => { if (v) payload[k] = k === "mood" || k === "notes" ? v : Number(v); });
-    if (metrics) {
-      await supabase.from("health_metrics").update(payload).eq("id", metrics.id);
+    
+    // Check if entry exists for this date
+    const { data: existing } = await supabase.from("health_metrics").select("id")
+      .eq("user_id", user.id).eq("metric_date", dateStr).maybeSingle();
+    
+    if (existing) {
+      await supabase.from("health_metrics").update(payload).eq("id", existing.id);
     } else {
       await supabase.from("health_metrics").insert(payload);
     }
-    toast.success("Metrics logged!");
+    toast.success(`Metrics logged for ${format(selectedDate, "MMM d, yyyy")}!`);
     setLogOpen(false);
     fetchData();
   };
@@ -157,8 +192,29 @@ const Dashboard = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle className="font-display">Log Today's Metrics</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-display">Log Metrics</DialogTitle></DialogHeader>
             <form onSubmit={handleLogMetrics} className="space-y-4">
+              <div>
+                <Label>Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(selectedDate, "PPP")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(d) => d && setSelectedDate(d)}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Heart Rate (bpm)</Label><Input type="number" value={formData.heart_rate} onChange={e => setFormData(p => ({ ...p, heart_rate: e.target.value }))} /></div>
                 <div><Label>Steps</Label><Input type="number" value={formData.steps} onChange={e => setFormData(p => ({ ...p, steps: e.target.value }))} /></div>
@@ -208,7 +264,7 @@ const Dashboard = () => {
         </motion.div>
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }} className="glass-card p-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg gradient-routine"><Calendar className="w-4 h-4 text-accent-foreground" /></div>
+            <div className="p-2 rounded-lg gradient-routine"><CalendarIcon className="w-4 h-4 text-accent-foreground" /></div>
             <p className="text-sm text-muted-foreground">Routine Completion</p>
           </div>
           <p className="text-2xl font-bold font-display">{routineCompletion}%</p>
