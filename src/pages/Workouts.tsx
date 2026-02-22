@@ -3,13 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dumbbell, Plus, Check, Trash2, Clock, Flame, TrendingUp, Award, BarChart3, Calendar } from "lucide-react";
+import MuscleAnatomy from "@/components/MuscleAnatomy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format, subDays } from "date-fns";
 
 const workoutTypes = ["strength", "cardio", "flexibility", "hiit", "yoga", "swimming", "running", "cycling"];
@@ -208,20 +209,9 @@ const Workouts = () => {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6">
           <h3 className="font-display font-semibold mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" /> Workout Types
+            <TrendingUp className="w-4 h-4" /> Muscles Engaged Today
           </h3>
-          {typeDistribution.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={typeDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  {typeDistribution.map((entry, i) => <Cell key={i} fill={TYPE_COLORS[entry.name] || "hsl(0 0% 63%)"} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "hsl(0 0% 14%)", border: "none", borderRadius: 8, color: "hsl(0 0% 98%)" }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-16">Complete workouts to see distribution</p>
-          )}
+          <MuscleAnatomy workouts={workouts} />
         </motion.div>
       </div>
 
