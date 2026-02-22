@@ -1,8 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, Dumbbell, CalendarClock, Bot, LogOut, LayoutDashboard } from "lucide-react";
+import { Heart, Dumbbell, CalendarClock, Bot, LogOut, LayoutDashboard, Sun, Moon, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard, gradient: "gradient-health" },
@@ -13,7 +16,10 @@ const navItems = [
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const userEmail = user?.email || "";
+  const userInitial = userEmail.charAt(0).toUpperCase() || "U";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -51,9 +57,32 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             })}
           </nav>
 
-          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-muted">
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-muted">
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-muted transition-colors">
+                  <Avatar className="w-7 h-7">
+                    <AvatarFallback className="text-xs gradient-health text-primary-foreground">{userInitial}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden lg:inline text-sm text-muted-foreground truncate max-w-[140px]">{userEmail}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium truncate">{userEmail}</p>
+                  <p className="text-xs text-muted-foreground">Signed in</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
+                  <LogOut className="w-4 h-4 mr-2" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
