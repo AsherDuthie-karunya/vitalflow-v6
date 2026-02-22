@@ -208,94 +208,149 @@
   background: hsl(var(--background));
 }
 
+/* Primary aurora blobs */
 .app-bg::before,
 .app-bg::after {
   content: "";
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.15;
-  animation: float 20s ease-in-out infinite;
+  filter: blur(120px);
+  opacity: 0.18;
+  will-change: transform;
 }
 
 .app-bg::before {
-  width: 600px;
-  height: 600px;
-  background: hsl(168, 80%, 36%);
-  top: -10%;
-  left: -5%;
-  animation-delay: 0s;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, hsl(168, 80%, 40%) 0%, hsl(200, 85%, 50%) 60%, transparent 100%);
+  top: -15%;
+  left: -10%;
+  animation: aurora1 24s ease-in-out infinite;
 }
 
 .app-bg::after {
-  width: 500px;
-  height: 500px;
-  background: hsl(340, 75%, 55%);
-  bottom: -10%;
-  right: -5%;
-  animation-delay: -10s;
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, hsl(340, 75%, 55%) 0%, hsl(262, 70%, 58%) 60%, transparent 100%);
+  bottom: -15%;
+  right: -10%;
+  animation: aurora2 28s ease-in-out infinite;
 }
 
+/* Floating orbs */
 .app-bg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.1;
-  animation: float2 25s ease-in-out infinite;
+  filter: blur(90px);
+  opacity: 0.12;
+  will-change: transform;
 }
 
 .app-bg-orb:nth-child(1) {
-  width: 400px;
-  height: 400px;
-  background: hsl(262, 70%, 58%);
-  top: 40%;
-  right: 20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, hsl(262, 70%, 58%) 0%, hsl(280, 60%, 45%) 50%, transparent 100%);
+  top: 30%;
+  right: 15%;
+  animation: orb1 30s ease-in-out infinite;
 }
 
 .app-bg-orb:nth-child(2) {
-  width: 350px;
-  height: 350px;
-  background: hsl(38, 92%, 55%);
-  top: 60%;
-  left: 10%;
-  animation-delay: -8s;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, hsl(38, 92%, 55%) 0%, hsl(20, 90%, 48%) 50%, transparent 100%);
+  top: 55%;
+  left: 5%;
+  animation: orb2 26s ease-in-out infinite;
+  animation-delay: -6s;
 }
 
 .app-bg-orb:nth-child(3) {
-  width: 300px;
-  height: 300px;
-  background: hsl(200, 85%, 50%);
-  top: 10%;
-  right: 40%;
-  animation-delay: -15s;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, hsl(200, 85%, 50%) 0%, hsl(168, 80%, 36%) 50%, transparent 100%);
+  top: 5%;
+  right: 30%;
+  animation: orb3 22s ease-in-out infinite;
+  animation-delay: -12s;
 }
 
-/* Grid overlay */
+/* Subtle dot grid overlay */
 .app-bg-grid {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(hsl(var(--foreground) / 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--foreground) / 0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-image: radial-gradient(circle, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
 }
 
+/* Noise texture overlay */
+.app-bg-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Vignette */
+.app-bg-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, hsl(var(--background) / 0.5) 100%);
+}
+
+/* Dark mode adjustments */
 .dark .app-bg::before,
 .dark .app-bg::after {
-  opacity: 0.08;
+  opacity: 0.1;
+  filter: blur(140px);
 }
 
 .dark .app-bg-orb {
-  opacity: 0.06;
+  opacity: 0.07;
 }
 
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -40px) scale(1.05); }
-  66% { transform: translate(-20px, 30px) scale(0.95); }
+.dark .app-bg-grid::after {
+  opacity: 0.04;
 }
 
-@keyframes float2 {
+/* Aurora animations - fluid, organic movement */
+@keyframes aurora1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25% { transform: translate(60px, -50px) scale(1.08) rotate(5deg); }
+  50% { transform: translate(20px, 40px) scale(0.95) rotate(-3deg); }
+  75% { transform: translate(-40px, -20px) scale(1.04) rotate(2deg); }
+}
+
+@keyframes aurora2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25% { transform: translate(-50px, 30px) scale(1.06) rotate(-4deg); }
+  50% { transform: translate(30px, -60px) scale(0.92) rotate(6deg); }
+  75% { transform: translate(40px, 20px) scale(1.1) rotate(-2deg); }
+}
+
+@keyframes orb1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-40px, 40px) scale(1.1); }
+  20% { transform: translate(-60px, 40px) scale(1.12); }
+  40% { transform: translate(30px, -30px) scale(0.9); }
+  60% { transform: translate(50px, 60px) scale(1.05); }
+  80% { transform: translate(-30px, -50px) scale(0.95); }
+}
+
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(70px, -40px) scale(1.08); }
+  66% { transform: translate(-50px, 50px) scale(0.93); }
+}
+
+@keyframes orb3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(40px, 50px) scale(0.92); }
+  50% { transform: translate(-60px, -30px) scale(1.1); }
+  75% { transform: translate(30px, -60px) scale(1.02); }
 }
