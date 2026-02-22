@@ -22,7 +22,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const userInitial = userEmail.charAt(0).toUpperCase() || "U";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Animated mesh background */}
+      <div className="app-bg">
+        <div className="app-bg-orb" />
+        <div className="app-bg-orb" />
+        <div className="app-bg-orb" />
+        <div className="app-bg-grid" />
+      </div>
       {/* Top Bar */}
       <header className="sticky top-0 z-50 glass-card rounded-none border-x-0 border-t-0 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

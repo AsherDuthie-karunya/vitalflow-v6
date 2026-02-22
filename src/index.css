@@ -198,3 +198,104 @@
     background-clip: text;
   }
 }
+
+/* Animated mesh background */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+.app-bg::before,
+.app-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: float 20s ease-in-out infinite;
+}
+
+.app-bg::before {
+  width: 600px;
+  height: 600px;
+  background: hsl(168, 80%, 36%);
+  top: -10%;
+  left: -5%;
+  animation-delay: 0s;
+}
+
+.app-bg::after {
+  width: 500px;
+  height: 500px;
+  background: hsl(340, 75%, 55%);
+  bottom: -10%;
+  right: -5%;
+  animation-delay: -10s;
+}
+
+.app-bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.1;
+  animation: float2 25s ease-in-out infinite;
+}
+
+.app-bg-orb:nth-child(1) {
+  width: 400px;
+  height: 400px;
+  background: hsl(262, 70%, 58%);
+  top: 40%;
+  right: 20%;
+}
+
+.app-bg-orb:nth-child(2) {
+  width: 350px;
+  height: 350px;
+  background: hsl(38, 92%, 55%);
+  top: 60%;
+  left: 10%;
+  animation-delay: -8s;
+}
+
+.app-bg-orb:nth-child(3) {
+  width: 300px;
+  height: 300px;
+  background: hsl(200, 85%, 50%);
+  top: 10%;
+  right: 40%;
+  animation-delay: -15s;
+}
+
+/* Grid overlay */
+.app-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--foreground) / 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.dark .app-bg::before,
+.dark .app-bg::after {
+  opacity: 0.08;
+}
+
+.dark .app-bg-orb {
+  opacity: 0.06;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, 40px) scale(1.1); }
+}
